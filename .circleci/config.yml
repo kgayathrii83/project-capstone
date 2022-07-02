@@ -118,8 +118,8 @@ jobs:
       - run:
          name: get the cluster name
          command: |
-            aws eks list-clusters --region us-east-1 --query clusters[0] --output text >> .circleci/files/eksclustername.txt 
-            cat .circleci/files/eksclustername.txt
+            aws eks list-clusters --region us-east-1 --query clusters[0] --output text >> .circleci/files/clustername.txt 
+            cat .circleci/files/clustername.txt
       - run:
           name: Install tar utility
           command: |
