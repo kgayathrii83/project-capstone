@@ -80,7 +80,7 @@ jobs:
          name: get the cluster name
          command: |
             aws configure list
-            aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --region=us-east-1 aws_access_key_id=AKIAT5TVF3G5QBYGEUUS aws_secret_access_key=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 --no-paginate --output text >> .circleci/files/clustername.txt
+            aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --region=us-east-1 --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
       - run:
           name: Install tar utility
@@ -94,9 +94,9 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-and-test-app
-      - lint-app
+      #- build-and-test-app
+      #- lint-app
       - get-cluster-details 
-      - build-docker-and-push-image:
+      #- build-docker-and-push-image:
          requires: [build-and-test-app, lint-app]
         
