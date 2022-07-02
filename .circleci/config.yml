@@ -28,8 +28,21 @@ jobs:
       - save_cache:
          paths: [node_modules]
          key: build-application
+
+  lint-app:
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+         name: lint on app
+         command: |
+            make lint
+            
          
 workflows:
   default:
     jobs:
       - build-app
+      - lint-app
