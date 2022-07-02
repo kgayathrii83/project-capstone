@@ -138,9 +138,11 @@ jobs:
       - run:
          name: install dependencies
          command: |
-            dnf clean packages
+
             df -h
-            dnf update -y
+            docker system prune 
+            docker images 
+            docker rmi 
             
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
