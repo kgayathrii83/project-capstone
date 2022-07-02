@@ -199,7 +199,7 @@ workflows:
     jobs:
       #- build-and-test-app
       #- lint-app
-      #- build-docker-and-push-image:
+      - build-docker-and-push-image:
       #   requires: [build-and-test-app, lint-app]
       - get-cluster-details 
       - deploy-app-to-cluster:
