@@ -67,7 +67,7 @@ jobs:
       - run:
          name: push to dockerhub
          command: |
-            docker login -u kgaaythrii83
+            docker login -u kgaaythrii83 -p Dockerhub!123
             docker tag mycapstone:${CIRCLE_WORKFLOW_ID:0:7} kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
             docker push kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
             
