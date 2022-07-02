@@ -79,9 +79,7 @@ jobs:
       - run:
          name: get cluster name
          command: |
-            aws cloudformation \
-              list-exports --query "Exports[?Name==\`EksClusterName\`].Value" \
-              --no-paginate --output text >> .circleci/files/clustername.txt
+            aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
       - run:
           name: Install tar utility
