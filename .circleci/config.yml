@@ -43,7 +43,7 @@ jobs:
       - run:
          name: lint on app
          command: |
-            ./hadolint Dockerfile
+            ./bin/hadolint Dockerfile
          
 workflows:
   default:
