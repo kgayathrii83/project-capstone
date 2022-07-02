@@ -31,7 +31,7 @@ commands:
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
             
-            aws eks update-kubeconfig --name ExistingEksClusterName
+            aws eks update-kubeconfig --name "${EksClusterName}"
             kubectl get svc mycapstone -o json | jq .status.loadBalancer.ingress[].hostname >> hostname.txt
             export API_IP=$(sed -e 's/^"//' -e 's/"$//' < hostname.txt)
             export API_URL="http://${API_IP}:80"
@@ -152,7 +152,8 @@ jobs:
             cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
-            aws eks update-kubeconfig --name ExistingEksClusterName
+            
+            aws eks update-kubeconfig --name "${EksClusterName}"
             kubectl get nodes
       - run:
          name: Deploy App
