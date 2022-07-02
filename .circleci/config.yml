@@ -196,6 +196,6 @@ workflows:
       #- build-docker-and-push-image:
       #   requires: [build-and-test-app, lint-app]
       - get-cluster-details 
-      - deploy-app-to-cluster
+      - deploy-app-to-cluster:
          #requires: [build-docker-and-push-image, get-cluster-details]      
          requires: [get-cluster-details]      
