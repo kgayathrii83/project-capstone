@@ -7,7 +7,7 @@ install:
     chmod +x ./hadolint
     
 copy:
-    sudo cp ./config/nginx.conf /etc/nginx/nginx.conf
+    sudo cp ./config/nginx.conf /etc/nginx/nginx.conf &&\
     sudo cp -r ./www /www
     
 build:
