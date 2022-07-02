@@ -169,7 +169,7 @@ jobs:
       - run:
          name: Deploy App
          command: |
-            kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:08f77c9
+            kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
       - run:
          name: check deployment status
          command: |
@@ -203,5 +203,5 @@ workflows:
       #   requires: [build-and-test-app, lint-app]
       - get-cluster-details 
       - deploy-app-to-cluster:
-         #requires: [build-docker-and-push-image, get-cluster-details]      
-         requires: [get-cluster-details]      
+         requires: [build-docker-and-push-image, get-cluster-details]      
+   
