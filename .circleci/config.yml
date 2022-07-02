@@ -77,7 +77,7 @@ jobs:
     steps:
       - checkout
       - run:
-         name: get cluster name
+         name: get the cluster name
          command: |
             aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --region=us-east-1  --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
