@@ -1,0 +1,58 @@
+Description: >
+  Capstone ekscluster stack.
+  
+Parameters:
+  WorkflowID:
+    Description: Unique identifier.
+    Type: String
+
+Resources:
+  EksCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub mycapstone
+      Version: "1.20"
+      RoleArn: arn:aws:iam::269754948027:role/myEKSClusterRole
+      ResourcesVpcConfig: 
+        SecurityGroupIds:
+          - sg-07fd0c957ae4f57f7
+        SubnetIds:
+          - subnet-048b5b865dd895d3f
+          - subnet-09768e0e2dc385211
+          - subnet-05039dabcf279a5dc
+          - subnet-0231c49fd720bb35d
+          - subnet-03ea8b3673646557e
+          - subnet-0a8a800826c95e167
+        EndpointPublicAccess: true
+      Tags: 
+        - Key: Name
+          Value: !Sub mycapstone-${WorkflowID}
+  
+  EKSNodegroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      AmiType: AL2_x86_64
+      CapacityType: ON_DEMAND
+      DiskSize: 20
+      ClusterName: !Ref EksCluster
+      NodeRole: arn:aws:iam::269754948027:role/myEKSWorkerNodeRole
+      RemoteAccess:
+        Ec2SshKey: udapeople
+      ScalingConfig:
+        MinSize: 2
+        DesiredSize: 2
+        MaxSize: 2
+      Subnets:
+          - subnet-048b5b865dd895d3f
+          - subnet-09768e0e2dc385211
+          - subnet-05039dabcf279a5dc
+          - subnet-0231c49fd720bb35d
+          - subnet-03ea8b3673646557e
+          - subnet-0a8a800826c95e167
+
+Outputs:
+  EksClusterName:
+    Value: MyCapstone-Cluster
+    Description: Name of the EKS Cluster
+    Export:
+      Name: EksClusterName
