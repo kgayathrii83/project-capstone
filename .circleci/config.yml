@@ -147,9 +147,10 @@ jobs:
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             kubectl version --short --client
             
-            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            curl -LO minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
             sudo install minikube-linux-amd64 /usr/local/bin/minikube
             minikube version
+            minikube start
             
       - run:
          name: configure kube
@@ -158,7 +159,7 @@ jobs:
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
             
-            minikube start
+            
             
             aws eks update-kubeconfig --name "${EksClusterName}"
             kubectl get nodes
