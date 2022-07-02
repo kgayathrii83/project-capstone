@@ -21,23 +21,14 @@ jobs:
          name: build app
          command: |
            make build
+      - run:
+         name: test app
+         command: |
+           make test
       - save_cache:
          paths: [node_modules]
          key: build-application
 
-  test-app:         
-    docker:
-      - image: cimg/base:2021.04
-    steps:
-      - checkout
-      - restore_cache:
-         keys: [build-application]   
-      - run:
-         name: test app
-         command: |
-           make test         
-      
-      
   lint-app:
     docker:
       - image: docker:stable
@@ -45,16 +36,16 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+         name: install dependencies
+         command: |
+            docker pull hadolint/hadolint
+      - run:
          name: lint on app
          command: |
-            make lint
-            
+            docker run --rm --interactive hadolint/hadolint < Dockerfile
          
 workflows:
   default:
     jobs:
       - build-app
-      - test-app:
-            requires: [build-app]      
-      - lint-app:
-            requires: [test-app]
+      - lint-app
