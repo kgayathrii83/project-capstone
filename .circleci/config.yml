@@ -45,5 +45,5 @@ workflows:
   default:
     jobs:
       - build-app
-      - lint-app
+      - lint-app:
             requires: [build-app]
