@@ -155,28 +155,19 @@ jobs:
       - run:
          name: configure kube
          command: |
-            cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
-            
-            
             
             aws eks update-kubeconfig --name "${EksClusterName}"
             kubectl get nodes
       - run:
          name: Deploy App
          command: |
-
-            
-            kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
-
+            kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:08f77c9
       - run:
          name: check deployment status
          command: |
             kubectl rollout status deployments/mycapstone
-            cat ~/project/.circleci/files/clustername.txt
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
-            echo ExistingEksClusterName: "${EksClusterName}"
 
             kubectl expose deployment/capstone --port 80 --type=LoadBalancer
 
@@ -200,10 +191,11 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-and-test-app
-      - lint-app
-      - build-docker-and-push-image:
-         requires: [build-and-test-app, lint-app]
+      #- build-and-test-app
+      #- lint-app
+      #- build-docker-and-push-image:
+      #   requires: [build-and-test-app, lint-app]
       - get-cluster-details 
-      - deploy-app-to-cluster:
-         requires: [build-docker-and-push-image, get-cluster-details]      
+      - deploy-app-to-cluster
+         #requires: [build-docker-and-push-image, get-cluster-details]      
+         requires: [get-cluster-details]      
