@@ -44,9 +44,37 @@ jobs:
          name: lint on app
          command: |
             ./hadolint Dockerfile
-         
+            
+  build-docker-and-push-image:
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - run:
+         name: install curl
+         command: |
+            apk add --update curl
+      - setup_remote_docker
+      - run:
+         name: build docker image
+         command: |
+            docker build --tag=mycapstone:${CIRCLE_WORKFLOW_ID:0:7} .
+            docker image ls
+      - run:
+         name: run docker image
+         command: |
+            docker run --detach --publish=80:80 --name=mycaptsone mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+         name: push to dockerhub
+         command: |
+            docker login -u kgaaythrii83
+            docker tag mycapstone:${CIRCLE_WORKFLOW_ID:0:7} kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            docker push kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            
 workflows:
   default:
     jobs:
       - build-and-test-app
       - lint-app
+      - build-docker-and-push-image:
+         requires: [build-app, lint-app]
