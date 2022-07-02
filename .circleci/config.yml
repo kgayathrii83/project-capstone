@@ -92,13 +92,42 @@ jobs:
           root: ~/project/.circleci/files
           paths:
             - .
+
+  create-eks-cluster:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
+      - attach_workspace:
+          at: ~/project/.circleci/files
+      - run:
+         name: create eks cluster
+         command: |
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            
+            if [[ "${EksClusterName}" != "MyCapstone-Cluster" ]]
+            then
+               aws cloudformation deploy \
+                 --template-file .circleci/files/ekscluster.yml \
+                 --tags project=mycapstone \
+                 --stack-name "mycapstone-${CIRCLE_WORKFLOW_ID:0:7}" \
+                 --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+               echo "cluster created" 
+            fi
+         no_output_timeout: 20m
             
 workflows:
   default:
     jobs:
       #- build-and-test-app
       #- lint-app
-      - get-cluster-details 
       #- build-docker-and-push-image:
       #   requires: [build-and-test-app, lint-app]
-        
+      - get-cluster-details 
+      - create-eks-cluster:
+         requires: [get-cluster-details]      
