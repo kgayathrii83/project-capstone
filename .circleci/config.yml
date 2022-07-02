@@ -1,5 +1,40 @@
 version: 2.1
 
+commands:
+   rollback-deployment:
+    description: Rollback deployment
+    steps:
+      - run:
+          name: rollback cluster
+          when: on_fail
+          command: |
+            kubectl rollout undo deployments/mycapstone
+      - run:
+         name: check rollback details
+         when: on_fail
+         command: |
+            echo '#####deploy##########'
+            kubectl get deploy mycapstone
+            echo '######rs#########'
+            kubectl get rs
+            echo '######get pods#########'
+            kubectl get pods
+            echo '#####desc pods##########'
+            kubectl describe pods
+            echo '######desc svc#########'
+            kubectl describe services/mycapstone
+      - run:
+          name: check rollback status
+          when: on_fail
+          command: |
+            aws eks update-kubeconfig --name mycapstone
+            kubectl get svc mycapstone -o json | jq .status.loadBalancer.ingress[].hostname >> hostname.txt
+            export API_IP=$(sed -e 's/^"//' -e 's/"$//' < hostname.txt)
+            export API_URL="http://${API_IP}:80"
+            echo "${API_URL}"
+            curl "${API_URL}"
+
+
 jobs:
   build-and-test-app:
     docker:
@@ -63,7 +98,7 @@ jobs:
       - run:
          name: run docker image
          command: |
-            docker run --detach --publish=80:80 --name=mycaptsone mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            docker run --detach --publish=80:80 --name=mycapstone mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
       - run:
          name: push to dockerhub
          command: |
@@ -90,11 +125,71 @@ jobs:
           paths:
             - .
 
+  deploy-app-to-cluster:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - attach_workspace:
+          at: ~/project/.circleci/files
+      - run:
+         name: install dependencies
+         command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+            curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.6/2022-03-09/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+            kubectl version --short --client
+      - run:
+         name: configure kube
+         command: |
+            aws eks update-kubeconfig --name mycapstone
+            kubectl get nodes
+      - run:
+         name: Deploy App
+         command: |
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            
+            kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+
+      - run:
+         name: check deployment status
+         command: |
+            kubectl rollout status deployments/mycapstone
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+
+            kubectl expose deployment/capstone --port 80 --type=LoadBalancer
+
+      - run:
+         name: check deployment details
+         command: |
+            echo '#####deploy##########'
+            kubectl get deploy mycapstone
+            echo '######rs#########'
+            kubectl get rs
+            echo '#####get pods##########'
+            kubectl get pods
+            echo '######desc pods#########'
+            kubectl describe pods
+            echo '######desc svc#########'
+            kubectl describe services/mycapstone
+      - rollback-deployment
+            
+
+
 workflows:
   default:
     jobs:
-      #- build-and-test-app
-      #- lint-app
-      #- build-docker-and-push-image:
-      #   requires: [build-and-test-app, lint-app]
+      - build-and-test-app
+      - lint-app
+      - build-docker-and-push-image:
+         requires: [build-and-test-app, lint-app]
       - get-cluster-details 
+      - deploy-app-to-cluster:
+         requires: [get-cluster-details]      
