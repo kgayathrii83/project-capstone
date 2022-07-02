@@ -97,8 +97,9 @@ jobs:
 workflows:
   default:
     jobs:
-      #- build-and-test-app
-      #- lint-app
-      #- build-docker-and-push-image:
-      #   requires: [build-and-test-app, lint-app]
-      - get-cluster-details         
+      - build-and-test-app
+      - lint-app
+      - get-cluster-details 
+      - build-docker-and-push-image:
+         requires: [build-and-test-app, lint-app]
+        
