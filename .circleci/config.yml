@@ -70,11 +70,32 @@ jobs:
             docker login -u kgaaythrii83 -p Dockerhub!123
             docker tag mycapstone:${CIRCLE_WORKFLOW_ID:0:7} kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
             docker push kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+
+  get-cluster-details:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+         name: get cluster name
+         command: |
+            aws cloudformation \
+              list-exports --query "Exports[?Name==\`EksClusterName\`].Value" \
+              --no-paginate --output text >> .circleci/files/clustername.txt
+            cat .circleci/files/clustername.txt
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
+      - persist_to_workspace:
+          root: ~/project/.circleci/files
+          paths:
             
 workflows:
   default:
     jobs:
-      - build-and-test-app
-      - lint-app
-      - build-docker-and-push-image:
-         requires: [build-and-test-app, lint-app]
+      #- build-and-test-app
+      #- lint-app
+      #- build-docker-and-push-image:
+      #   requires: [build-and-test-app, lint-app]
+      - get-cluster-details         
