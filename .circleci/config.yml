@@ -100,5 +100,5 @@ workflows:
       #- lint-app
       - get-cluster-details 
       #- build-docker-and-push-image:
-         requires: [build-and-test-app, lint-app]
+      #   requires: [build-and-test-app, lint-app]
         
