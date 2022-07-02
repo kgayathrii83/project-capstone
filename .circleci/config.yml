@@ -192,4 +192,4 @@ workflows:
          requires: [build-and-test-app, lint-app]
       - get-cluster-details 
       - deploy-app-to-cluster:
-         requires: [get-cluster-details]      
+         requires: [build-docker-and-push-image, get-cluster-details]      
