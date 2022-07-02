@@ -6,10 +6,6 @@ install:
 	wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
     chmod +x ./hadolint
     
-copy:
-    sudo cp ./config/nginx.conf /etc/nginx/nginx.conf &&\
-    sudo cp -r ./www /www
-    
 build:
 	sudo service nginx start
 	
