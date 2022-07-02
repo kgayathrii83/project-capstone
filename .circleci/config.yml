@@ -79,7 +79,9 @@ jobs:
       - run:
          name: get the cluster name
          command: |
-            aws configure import --csv file://.circleci/files/credentials.csv
+            aws configure access_key AKIAT5TVF3G5QBYGEUUS
+            aws configure secret_key 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
+            aws configure region us-east-1
             aws configure list
             aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --region=us-east-1  --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
