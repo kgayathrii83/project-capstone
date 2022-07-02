@@ -21,14 +21,23 @@ jobs:
          name: build app
          command: |
            make build
-      - run:
-         name: test app
-         command: |
-           make test
       - save_cache:
          paths: [node_modules]
          key: build-application
 
+  test-app:         
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - checkout
+      - restore_cache:
+         keys: [build-application]   
+      - run:
+         name: test app
+         command: |
+           make test         
+      
+      
   lint-app:
     docker:
       - image: docker:stable
@@ -45,5 +54,7 @@ workflows:
   default:
     jobs:
       - build-app
+      - test-app:
+            requires: [build-app]      
       - lint-app:
-            requires: [build-app]
+            requires: [test-app]
