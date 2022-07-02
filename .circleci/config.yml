@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build-app:
+  build-and-test-app:
     docker:
       - image: cimg/base:2021.04
     steps:
@@ -38,14 +38,15 @@ jobs:
       - run:
          name: install dependencies
          command: |
-            docker pull hadolint/hadolint
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint            
       - run:
          name: lint on app
          command: |
-            docker run --rm --interactive hadolint/hadolint < Dockerfile
+            ./hadolint Dockerfile
          
 workflows:
   default:
     jobs:
-      - build-app
+      - build-and-test-app
       - lint-app
