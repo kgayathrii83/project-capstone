@@ -77,4 +77,4 @@ workflows:
       - build-and-test-app
       - lint-app
       - build-docker-and-push-image:
-         requires: [build-app, lint-app]
+         requires: [build-and-test-app, lint-app]
