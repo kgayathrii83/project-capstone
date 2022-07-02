@@ -79,9 +79,6 @@ jobs:
       - run:
          name: get the cluster name
          command: |
-            aws configure set access_key AKIAT5TVF3G5QBYGEUUS
-            aws configure set secret_key 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
-            aws configure set region us-east-1
             aws configure list
             aws cloudformation list-exports --query "Exports[?Name==\`EksClusterName\`].Value" --region=us-east-1 aws_access_key_id=AKIAT5TVF3G5QBYGEUUS aws_secret_access_key=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 --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
