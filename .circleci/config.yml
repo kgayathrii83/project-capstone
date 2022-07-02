@@ -27,7 +27,11 @@ commands:
           name: check rollback status
           when: on_fail
           command: |
-            aws eks update-kubeconfig --name mycapstone
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            
+            aws eks update-kubeconfig --name ExistingEksClusterName
             kubectl get svc mycapstone -o json | jq .status.loadBalancer.ingress[].hostname >> hostname.txt
             export API_IP=$(sed -e 's/^"//' -e 's/"$//' < hostname.txt)
             export API_URL="http://${API_IP}:80"
@@ -145,14 +149,15 @@ jobs:
       - run:
          name: configure kube
          command: |
-            aws eks update-kubeconfig --name mycapstone
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            aws eks update-kubeconfig --name ExistingEksClusterName
             kubectl get nodes
       - run:
          name: Deploy App
          command: |
-            cat ~/project/.circleci/files/clustername.txt
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
-            echo ExistingEksClusterName: "${EksClusterName}"
+
             
             kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
 
