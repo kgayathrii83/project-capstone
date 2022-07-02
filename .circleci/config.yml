@@ -11,8 +11,7 @@ jobs:
       - run:
          name: Install dependencies
          command: |
-           sudo apt-get update
-           sudo apt-get install -y nginx --no-install-recommends
+           make install 
       - run:
          name: copy project files
          command: |
@@ -21,11 +20,11 @@ jobs:
       - run:
          name: build app
          command: |
-           sudo service nginx start
+           make build
       - run:
          name: test app
          command: |
-           curl http://localhost:80/
+           make test
       - save_cache:
          paths: [node_modules]
          key: build-application
