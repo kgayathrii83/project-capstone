@@ -77,7 +77,7 @@ jobs:
     steps:
       - checkout
       - run:
-         name: get the cluster name
+         name: get cluster name
          command: |
             aws configure list
             aws cloudformation \
