@@ -266,12 +266,11 @@ workflows:
       - build-and-test-app
       - lint-app
       - build-docker-and-push-image
-         #requires: [build-and-test-app, lint-app]
+         requires: [build-and-test-app, lint-app]
       - get-cluster-details 
       - create-eks-cluster:
          requires: [get-cluster-details]        
       - deploy-app-to-cluster:
-         requires: [build-docker-and-push-image, get-cluster-details]      
+         requires: [build-docker-and-push-image, create-eks-cluster]      
       - test-app:
          requires: [deploy-app-to-cluster]         
-   
