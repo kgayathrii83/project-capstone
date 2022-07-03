@@ -197,7 +197,7 @@ jobs:
                kubectl expose deployment/mycapstone --port 80 --type=LoadBalancer
             fi
       - run:
-         name: check deployment details
+         name: check deployment detail
          command: |
             echo '#####deploy##########'
             kubectl get deploy mycapstone
