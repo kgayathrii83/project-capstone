@@ -175,8 +175,8 @@ jobs:
       - run:
          name: Deploy App
          command: |
-            cat ~/project/.circleci/files/eksclustername.txt
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/eksclustername.txt)
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
             
             kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
@@ -191,8 +191,8 @@ jobs:
          name: check deployment status
          command: |
             kubectl rollout status deployments/mycapstone
-            cat ~/project/.circleci/files/eksclustername.txt
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/eksclustername.txt)
+            cat ~/project/.circleci/files/clustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
             if [[ "${EksClusterName}" != "MyNewCapstone-Cluster" ]]
             then
