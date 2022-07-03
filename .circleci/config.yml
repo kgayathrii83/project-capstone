@@ -210,7 +210,8 @@ jobs:
             echo '######desc pods#########'
             kubectl describe pods
             echo '######desc svc#########'
-            kubectl describe services/mycapstone
+            kubectl describe services
+            #kubectl describe services/mycapstone
       - rollback-deployment
             
 
