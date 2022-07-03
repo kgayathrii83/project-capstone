@@ -33,6 +33,7 @@ commands:
             export API_URL="http://${API_IP}:80"
             echo "${API_URL}"
             curl "${API_URL}"
+
 jobs:
   build-and-test-app:
     docker:
@@ -110,7 +111,7 @@ jobs:
     steps:
       - checkout
       - run:
-         name: get the cluster name
+         name: get cluster name
          command: |
             aws cloudformation \
               list-exports --query "Exports[?Name==\`EksClusterName\`].Value" \
@@ -141,6 +142,7 @@ jobs:
             cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
+
             if [[ "${EksClusterName}" != "MyNewCapstone-Cluster" ]]
             then            
                 aws cloudformation deploy --template-file .circleci/files/ekscluster.yml --tags project=mycapstone --stack-name "mycapstone-${CIRCLE_WORKFLOW_ID:0:7}"  --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
@@ -188,6 +190,7 @@ jobs:
       - run:
          name: check deployment status
          command: |
+            kubectl expose deployment/mycapstone --port 80 --type=LoadBalancer
             kubectl rollout status deployments/mycapstone
             cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
@@ -195,9 +198,10 @@ jobs:
             if [[ "${EksClusterName}" != "MyNewCapstone-Cluster" ]]
             then
                kubectl expose deployment/mycapstone --port 80 --type=LoadBalancer
+               echo "Exposed deployment"
             fi
       - run:
-         name: check deployment detail
+         name: check deployment details
          command: |
             echo '#####deploy##########'
             kubectl get deploy mycapstone
