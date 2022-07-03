@@ -233,7 +233,7 @@ jobs:
             kubectl describe services/mycapstone
       - rollback-deployment
 
-  verify-app:
+  test-app:
     docker:
       - image: cimg/base:2021.04
     steps:
@@ -272,6 +272,6 @@ workflows:
          requires: [get-cluster-details]        
       - deploy-app-to-cluster:
          requires: [build-docker-and-push-image, get-cluster-details]      
-      - verify-app:
+      - test-app:
          requires: [deploy-app-to-cluster]         
    
