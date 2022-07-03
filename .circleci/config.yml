@@ -139,7 +139,7 @@ jobs:
       - attach_workspace:
           at: ~/project/.circleci/files
       - run:
-         name: create eks cluster
+         name: create the eks cluster
          command: |
             cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
