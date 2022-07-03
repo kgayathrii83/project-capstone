@@ -153,8 +153,8 @@ jobs:
       - run:
          name: configure kube
          command: |
-            #docker system prune
-            #minikube delete
+            docker system prune
+            minikube delete
             
 
             sudo wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -162,7 +162,7 @@ jobs:
             sudo chmod 755 /usr/local/bin/minikube
 
             minikube version
-            minikube start --driver=docker --container-runtime=containerd
+            minikube start --driver=docker
             
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
