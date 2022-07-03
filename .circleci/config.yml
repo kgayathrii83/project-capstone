@@ -181,6 +181,18 @@ jobs:
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
             
+            #echo "Before Updating Image"
+            #echo '##### LIST DEPLOYMENTS ##########'
+            #kubectl get deployments
+            #kubectl get deploy mycapstone
+            
+            echo '###### DESCRIBE PODS BEFORE UPDATING #########'
+            kubectl describe pods
+            echo '##### LIST PODS BEFORE UPDATING ##########'
+            kubectl get pods
+
+
+            
             if [[ "${EksClusterName}" == "MyNewCapstone-Cluster" ]]
             then
                kubectl set image deployments/mycapstone mycapstone=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
@@ -189,6 +201,13 @@ jobs:
                kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
                echo "Created deployment"
             fi
+            
+            echo '###### DESCRIBE PODS AFTER UPDATING #########'
+            kubectl describe pods
+            echo '##### LIST PODS AFTER UPDATING ##########'
+            kubectl get pods
+            
+            
       - run:
          name: check deployment status
          command: |
