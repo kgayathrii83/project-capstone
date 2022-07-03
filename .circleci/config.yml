@@ -215,7 +215,33 @@ jobs:
             echo '######desc svc#########'
             kubectl describe services/mycapstone
       - rollback-deployment
-            
+
+  verify-app:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - run:
+         name: install dependencies
+         command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+            curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.6/2022-03-09/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+            kubectl version --short --client
+      - run: 
+         name: check app
+         command: |
+            aws eks update-kubeconfig --name mycapstone
+            kubectl get svc capstone -o json | jq .status.loadBalancer.ingress[].hostname >> ip.txt
+            export API_IP=$(sed -e 's/^"//' -e 's/"$//' < ip.txt)
+            export API_URL="http://${API_IP}:80"
+            echo "${API_URL}"
+            curl "${API_URL}"
+         no_output_timeout: 1m
+      - rollback-deployment            
 
 workflows:
   default:
@@ -229,4 +255,6 @@ workflows:
          requires: [get-cluster-details]        
       - deploy-app-to-cluster:
          requires: [build-docker-and-push-image, get-cluster-details]      
+      - verify-app:
+         requires: [deploy-app-to-cluster]         
    
