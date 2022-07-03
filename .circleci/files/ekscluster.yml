@@ -34,7 +34,7 @@ Resources:
       CapacityType: ON_DEMAND
       DiskSize: 20
       ClusterName: !Ref EksCluster
-      NodeRole: arn:aws:iam::269754948027:instance-profile/myWorkerNodeRole
+      NodeRole: arn:aws:iam::269754948027:role/myWorkerNodeRole
       RemoteAccess:
         Ec2SshKey: cloudformationkey
       ScalingConfig:
