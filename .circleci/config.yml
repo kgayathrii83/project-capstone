@@ -138,9 +138,6 @@ jobs:
       - run:
          name: install dependencies
          command: |
-
-            df -h
-
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
@@ -153,16 +150,12 @@ jobs:
       - run:
          name: configure kube
          command: |
-            docker system prune
-            minikube delete
-            
+            #sudo wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            #sudo cp minikube-linux-amd64 /usr/local/bin/minikube
+            #sudo chmod 755 /usr/local/bin/minikube
 
-            sudo wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-            sudo cp minikube-linux-amd64 /usr/local/bin/minikube
-            sudo chmod 755 /usr/local/bin/minikube
-
-            minikube version
-            minikube start --driver=docker
+            #minikube version
+            #minikube start --driver=docker
             
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
