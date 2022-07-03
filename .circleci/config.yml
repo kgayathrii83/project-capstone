@@ -27,18 +27,12 @@ commands:
           name: check rollback status
           when: on_fail
           command: |
-            cat ~/project/.circleci/files/clustername.txt
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
-            echo ExistingEksClusterName: "${EksClusterName}"
-            
-            aws eks update-kubeconfig --name "${EksClusterName}"
+            aws eks update-kubeconfig --name mycapstone
             kubectl get svc mycapstone -o json | jq .status.loadBalancer.ingress[].hostname >> hostname.txt
             export API_IP=$(sed -e 's/^"//' -e 's/"$//' < hostname.txt)
             export API_URL="http://${API_IP}:80"
             echo "${API_URL}"
             curl "${API_URL}"
-
-
 jobs:
   build-and-test-app:
     docker:
@@ -118,7 +112,9 @@ jobs:
       - run:
          name: get the cluster name
          command: |
-            aws eks list-clusters --region us-east-1 --query clusters[0] --output text >> .circleci/files/clustername.txt 
+            aws cloudformation \
+              list-exports --query "Exports[?Name==\`EksClusterName\`].Value" \
+              --region=us-east-1 --no-paginate --output text >> .circleci/files/clustername.txt
             cat .circleci/files/clustername.txt
       - run:
           name: Install tar utility
@@ -128,7 +124,7 @@ jobs:
           root: ~/project/.circleci/files
           paths:
             - .
-            
+ 
   create-eks-cluster:
     docker:
       - image: amazon/aws-cli
@@ -140,16 +136,19 @@ jobs:
       - attach_workspace:
           at: ~/project/.circleci/files
       - run:
-         name: create the eks cluster
+         name: create eks cluster
          command: |
             cat ~/project/.circleci/files/clustername.txt
             export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
             echo ExistingEksClusterName: "${EksClusterName}"
-            
-            aws cloudformation deploy --template-file .circleci/files/ekscluster.yml --tags project=mycapstone --stack-name "mycapstone-${CIRCLE_WORKFLOW_ID:0:7}"  --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
-            echo "cluster created" 
+            if [[ "${EksClusterName}" != "MyNewCapstone-Cluster" ]]
+            then            
+                aws cloudformation deploy --template-file .circleci/files/ekscluster.yml --tags project=mycapstone --stack-name "mycapstone-${CIRCLE_WORKFLOW_ID:0:7}"  --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+                echo "Cluster created" 
+            else
+                echo "Cluster is already available."
+            fi
          no_output_timeout: 20m
-
 
   deploy-app-to-cluster:
     docker:
@@ -168,37 +167,37 @@ jobs:
             chmod +x ./kubectl
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             kubectl version --short --client
-            
       - run:
          name: configure kube
          command: |
-            #sudo wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-            #sudo cp minikube-linux-amd64 /usr/local/bin/minikube
-            #sudo chmod 755 /usr/local/bin/minikube
-
-            #minikube version
-            #minikube start --driver=docker
-            
-            aws configure list
-            
-            aws sts get-caller-identity
-            
-            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/clustername.txt)
-            echo ExistingEksClusterName: "${EksClusterName}"
-            
-            aws eks update-kubeconfig --name "${EksClusterName}"
+            aws eks update-kubeconfig --name mycapstone
             kubectl get nodes
       - run:
          name: Deploy App
          command: |
+            cat ~/project/.circleci/files/eksclustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/eksclustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            
             kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            
+            #if [[ "${EksClusterName}" == "MyNewCapstone-Cluster" ]]
+            #then
+            #   kubectl set image deployments/mycapstone mycapstone=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            #else
+            #   kubectl create deploy mycapstone --image=kgaaythrii83/mycapstone:${CIRCLE_WORKFLOW_ID:0:7}
+            #fi
       - run:
          name: check deployment status
          command: |
             kubectl rollout status deployments/mycapstone
-
-            kubectl expose deployment/capstone --port 80 --type=LoadBalancer
-
+            cat ~/project/.circleci/files/eksclustername.txt
+            export EksClusterName=$(tail -n 1 ~/project/.circleci/files/eksclustername.txt)
+            echo ExistingEksClusterName: "${EksClusterName}"
+            if [[ "${EksClusterName}" != "MyNewCapstone-Cluster" ]]
+            then
+               kubectl expose deployment/mycapstone --port 80 --type=LoadBalancer
+            fi
       - run:
          name: check deployment details
          command: |
@@ -215,17 +214,16 @@ jobs:
       - rollback-deployment
             
 
-
 workflows:
   default:
     jobs:
       #- build-and-test-app
       #- lint-app
-      #- build-docker-and-push-image
-      #   requires: [build-and-test-app, lint-app]
+      - build-docker-and-push-image
+         requires: [build-and-test-app, lint-app]
       - get-cluster-details 
       - create-eks-cluster:
          requires: [get-cluster-details]        
-      #- deploy-app-to-cluster:
-      #   requires: [build-docker-and-push-image, get-cluster-details]      
+      - deploy-app-to-cluster:
+         requires: [build-docker-and-push-image, get-cluster-details]      
    
