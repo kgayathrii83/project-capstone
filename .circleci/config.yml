@@ -185,13 +185,9 @@ jobs:
             #echo '##### LIST DEPLOYMENTS ##########'
             #kubectl get deployments
             #kubectl get deploy mycapstone
-            
-            echo '###### DESCRIBE PODS BEFORE UPDATING #########'
-            kubectl describe pods
+
             echo '##### LIST PODS BEFORE UPDATING ##########'
             kubectl get pods
-
-
             
             if [[ "${EksClusterName}" == "MyNewCapstone-Cluster" ]]
             then
@@ -202,11 +198,11 @@ jobs:
                echo "Created deployment"
             fi
             
-            echo '###### DESCRIBE PODS AFTER UPDATING #########'
-            kubectl describe pods
+                        
             echo '##### LIST PODS AFTER UPDATING ##########'
             kubectl get pods
             
+
             
       - run:
          name: check deployment status
@@ -227,8 +223,10 @@ jobs:
             kubectl get deploy mycapstone
             echo '######rs#########'
             kubectl get rs
-            echo '#####get pods##########'
+            
+            echo '##### LIST PODS AFTER UPDATING ##########'
             kubectl get pods
+            
             echo '######desc pods#########'
             kubectl describe pods
             echo '######desc svc#########'
